@@ -1,5 +1,6 @@
 import Sidebar from '@/components/Sidebar';
 import MessageList from '@/components/MessageList';
+import ChatInput from '@/components/ChatInput';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function Home() {
@@ -20,6 +21,11 @@ export default function Home() {
 
         {/* Messages - Takes all available space */}
         <MessageList />
+
+        {/* Input Area - Fixed at bottom via flex layout */}
+        <div className='bg-background border-t'>
+          <ChatInput />
+        </div>
       </main>
     </div>
   );
