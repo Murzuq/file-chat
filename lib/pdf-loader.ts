@@ -1,14 +1,31 @@
-import * as pdf from 'pdf-parse';
+import PDFParser from 'pdf2json';
 
 export async function getChunkedDocsFromPDF(pdfBuffer: Buffer) {
   try {
-    // 1. Parse the PDF into text
-    const data = await (pdf as any)(pdfBuffer);
-    const text = data.text;
-    // 2. Split text into smaller chunks (Naive splitting for now)
-    // In a real app, you'd use a smarter splitter like RecursiveCharacterTextSplitter
-    // but this works great for a tutorial.
-    const chunks = splitTextIntoChunks(text, 1000); // 1000 char chunks
+    // 1. Parse the PDF using pdf2json
+    const text = await new Promise<string>((resolve, reject) => {
+      const pdfParser = new (PDFParser as any)(null, 1); // 1 = text only
+
+      pdfParser.on('pdfParser_dataError', (errData: any) => {
+        reject(errData.parserError);
+      });
+
+      pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+        // Extract raw text content from the JSON structure
+        const rawText = (pdfParser as any).getRawTextContent();
+        resolve(rawText);
+      });
+
+      pdfParser.parseBuffer(pdfBuffer);
+    });
+
+    // 2. Clean the text (pdf2json results often need cleanup)
+    const cleanText = text
+      .replace(/----------------Page \(\d+\) Break----------------/g, '')
+      .replace(/\r\n/g, ' ');
+
+    // 3. Split text into smaller chunks
+    const chunks = splitTextIntoChunks(cleanText, 1000);
 
     return chunks;
   } catch (error) {
@@ -21,7 +38,7 @@ function splitTextIntoChunks(text: string, chunkSize: number): string[] {
   const chunks: string[] = [];
   let currentChunk = '';
 
-  // Simple splitting by sentence/period to keep context together roughly
+  // Split by periods to attempt sentence preservation
   const sentences = text.split('. ');
 
   for (const sentence of sentences) {
