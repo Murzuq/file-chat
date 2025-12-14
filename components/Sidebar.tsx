@@ -1,8 +1,8 @@
 import React from 'react';
 import { MessageSquare, Plus, Trash2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from './ThemeToggle';
 
-// Mock Data for Phase 2 (Static UI)
 const MOCK_CHATS = [
   { id: '1', title: 'Q3 Financial Report.pdf', date: 'Today' },
   { id: '2', title: 'Employee_Handbook_2024.pdf', date: 'Yesterday' },
@@ -18,18 +18,20 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   return (
     <div
       className={cn(
-        'flex h-full w-64 flex-col border-r bg-gray-50/50 pb-4 dark:bg-gray-900/50',
+        // Use 'bg-muted/20' or 'bg-secondary' for slight contrast against the main white background
+        'bg-muted/30 flex h-full w-64 flex-col border-r pb-4',
         className
       )}
     >
-      {/* Header / New Chat Button */}
+      {/* Header */}
       <div className='p-4'>
         <button
           className={cn(
-            'flex w-full items-center justify-start gap-2 rounded-lg border bg-white px-4 py-3 text-sm font-medium shadow-sm transition-colors hover:bg-gray-50 dark:bg-gray-950 dark:hover:bg-gray-900'
+            // Use 'bg-background' (white in light, black in dark) and 'text-foreground'
+            'bg-background hover:bg-accent hover:text-accent-foreground flex w-full items-center justify-start gap-2 rounded-lg border px-4 py-3 text-sm font-medium shadow-sm transition-colors'
           )}
         >
-          <Plus className='text-primary h-4 w-4' />
+          <Plus className='h-4 w-4' />
           <span>New Chat</span>
         </button>
       </div>
@@ -45,10 +47,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
               <button
                 key={chat.id}
                 className={cn(
-                  'group flex w-full items-center justify-between rounded-lg px-2 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800',
+                  'group hover:bg-accent hover:text-accent-foreground flex w-full items-center justify-between rounded-lg px-2 py-2 text-sm font-medium transition-colors',
+                  // Active state styling
                   chat.id === '1'
-                    ? 'text-primary bg-gray-100 dark:bg-gray-800'
-                    : 'text-gray-600 dark:text-gray-400'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'text-muted-foreground'
                 )}
               >
                 <div className='flex items-center gap-2 overflow-hidden'>
@@ -56,19 +59,18 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                   <span className='truncate'>{chat.title}</span>
                 </div>
 
-                {/* Delete button (only visible on hover for cleaner look) */}
-                <Trash2 className='h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100 hover:text-red-500' />
+                <Trash2 className='hover:text-destructive h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100' />
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Footer / User Info (Optional placeholder) */}
+      {/* Footer */}
       <div className='mt-auto border-t p-4'>
         <div className='text-muted-foreground flex items-center gap-2 text-sm'>
-          <div className='h-8 w-8 rounded-full bg-gray-200'></div>
-          <div className='flex flex-col'>
+          <div className='bg-muted-foreground/20 h-8 w-8 rounded-full'></div>
+          <div className='flex flex-col text-left'>
             <span className='text-foreground font-medium'>User</span>
             <span className='text-xs'>Free Plan</span>
           </div>
