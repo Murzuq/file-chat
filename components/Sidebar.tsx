@@ -1,7 +1,5 @@
-import React from 'react';
-import { MessageSquare, Plus, Trash2, FileText } from 'lucide-react';
+import { Plus, Trash2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ThemeToggle } from './ThemeToggle';
 
 const MOCK_CHATS = [
   { id: '1', title: 'Q3 Financial Report.pdf', date: 'Today' },

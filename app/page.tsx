@@ -56,7 +56,7 @@ export default function Home() {
         { id: botMessageId, role: 'assistant', content: '' },
       ]);
 
-      // 4. Decode the Stream
+      // 4. Decode the Raw Text Stream
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let done = false;
@@ -65,25 +65,10 @@ export default function Home() {
       while (!done) {
         const { value, done: doneReading } = await reader.read();
         done = doneReading;
+
+        // SIMPLIFIED: Just decode the text directly. No parsing needed!
         const chunkValue = decoder.decode(value, { stream: true });
-
-        // Simple parser for the text stream
-        // We look for patterns like 0:"text" which Vercel sends
-        const lines = chunkValue.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('0:')) {
-            try {
-              // Remove '0:' and the surrounding quotes
-              const content = line.substring(2);
-              // Parse the JSON string to get the actual text
-              const text = JSON.parse(content);
-              accumulatedText += text;
-            } catch {
-              // If parsing fails, ignore (keeps UI clean)
-            }
-          }
-        }
+        accumulatedText += chunkValue;
 
         // Update UI
         setMessages((prev) => {
@@ -116,7 +101,7 @@ export default function Home() {
 
       <main className='bg-background relative flex h-full w-full flex-1 flex-col'>
         <header className='bg-background/95 flex h-14 items-center justify-between border-b px-6 backdrop-blur'>
-          <h2 className='max-w-[300px] truncate text-sm font-semibold'>
+          <h2 className='max-w-75 truncate text-sm font-semibold'>
             {isChatOpen ? currentFileName || 'Chat' : 'New Chat'}
           </h2>
           <div className='flex items-center gap-2'>

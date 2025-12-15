@@ -63,6 +63,9 @@ export async function POST(req: Request) {
       messages: coreMessages, // Pass our clean array here
     });
 
+    console.log('Result Zuq:' + result);
+    console.log(result);
+
     return result.toTextStreamResponse();
   } catch (error) {
     console.error('Chat API Error:', error);
