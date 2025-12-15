@@ -1,75 +1,89 @@
+import React, { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { Bot, User } from 'lucide-react';
+import { Bot, User, Loader2 } from 'lucide-react';
 
-// Mock Data for UI dev
-export const MOCK_MESSAGES = [
-  {
-    id: '1',
-    role: 'system',
-    content:
-      'Hello! I am your PDF assistant. Upload a document to get started.',
-  },
-  {
-    id: '2',
-    role: 'user',
-    content:
-      'I just uploaded the financial report. Can you summarize the key findings for Q3?',
-  },
-  {
-    id: '3',
-    role: 'assistant', // 'assistant' is the standard AI term
-    content:
-      'Based on the Q3 Financial Report, here are the key findings:\n\n1. **Revenue Growth:** Total revenue increased by 15% year-over-year.\n2. **Cost Reduction:** Operational costs were reduced by 8% due to supply chain optimization.\n3. **Net Profit:** The net profit margin stands at 22%, exceeding the initial forecast of 18%.',
-  },
-];
-
-interface MessageProps {
-  role: string;
+// FIX: Define the type locally to avoid library conflicts
+export interface Message {
+  id: string;
+  role: 'function' | 'system' | 'user' | 'assistant' | 'data' | 'tool';
   content: string;
 }
 
-const MessageBubble = ({ role, content }: MessageProps) => {
-  const isUser = role === 'user';
+interface MessageListProps {
+  messages: Message[];
+  isLoading: boolean;
+}
+
+export default function MessageList({ messages, isLoading }: MessageListProps) {
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
+
+  if (messages.length === 0) {
+    return (
+      <div className='text-muted-foreground flex flex-1 items-center justify-center p-8 text-center'>
+        <p>Ask a question about your document to start!</p>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={cn(
-        'flex w-full items-start gap-4 p-4',
-        isUser ? 'flex-row-reverse' : 'flex-row'
+    <div className='flex flex-1 flex-col gap-4 overflow-y-auto p-4 pb-10'>
+      {messages.map((msg) => {
+        const isUser = msg.role === 'user';
+        return (
+          <div
+            key={msg.id}
+            className={cn(
+              'flex w-full items-start gap-4',
+              isUser ? 'flex-row-reverse' : 'flex-row'
+            )}
+          >
+            <div
+              className={cn(
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border shadow-sm',
+                isUser ? 'bg-background' : 'bg-primary text-primary-foreground'
+              )}
+            >
+              {isUser ? (
+                <User className='h-4 w-4' />
+              ) : (
+                <Bot className='h-4 w-4' />
+              )}
+            </div>
+
+            <div
+              className={cn(
+                'flex max-w-[80%] flex-col gap-1 rounded-lg px-4 py-3 text-sm shadow-sm',
+                isUser
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-foreground border'
+              )}
+            >
+              <div className='leading-relaxed whitespace-pre-wrap'>
+                {msg.content}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {isLoading && messages[messages.length - 1]?.role === 'user' && (
+        <div className='flex w-full items-start gap-4'>
+          <div className='bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full'>
+            <Loader2 className='h-4 w-4 animate-spin' />
+          </div>
+          <div className='text-muted-foreground flex items-center text-sm'>
+            Thinking...
+          </div>
+        </div>
       )}
-    >
-      {/* Avatar */}
-      <div
-        className={cn(
-          'flex h-8 w-8 shrink-0 items-center justify-center rounded-full border shadow-sm',
-          isUser ? 'bg-background' : 'bg-primary text-primary-foreground'
-        )}
-      >
-        {isUser ? <User className='h-4 w-4' /> : <Bot className='h-4 w-4' />}
-      </div>
 
-      {/* Message Content */}
-      <div
-        className={cn(
-          'flex max-w-[80%] flex-col gap-1 rounded-lg px-4 py-3 text-sm shadow-sm',
-          isUser
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted text-foreground border'
-        )}
-      >
-        {/* We use whitespace-pre-wrap to handle newlines in AI responses */}
-        <div className='leading-relaxed whitespace-pre-wrap'>{content}</div>
-      </div>
-    </div>
-  );
-};
-
-export default function MessageList() {
-  return (
-    <div className='flex flex-1 flex-col gap-2 overflow-y-auto p-4 pb-20'>
-      {MOCK_MESSAGES.map((msg) => (
-        <MessageBubble key={msg.id} role={msg.role} content={msg.content} />
-      ))}
+      <div ref={bottomRef} />
     </div>
   );
 }
